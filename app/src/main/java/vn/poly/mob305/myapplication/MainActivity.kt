@@ -1,63 +1,70 @@
 package vn.poly.mob305.myapplication
 
 import android.os.Bundle
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.CutCornerShape
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.AddCircle
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.Email
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material3.AssistChip
-import androidx.compose.material3.AssistChipDefaults
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardColors
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExtendedFloatingActionButton
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Dialog
-import com.android.compose.screenshot.report.Image
-import kotlinx.coroutines.launch
-import vn.poly.mob305.myapplication.ui.theme.MyApplicationTheme
+import kotlin.random.Random
 
 class MainActivity : ComponentActivity() {
+    // cách thể hiện 1 danh sách từ Array Object lên LazyColumn
+    // cập nhật, sửa, xóa trên LazyColumn
+
+    // tao class Sinh Vien
+    data class Student(val name: String, val number: String)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContent {
+        // tao Array Sinh Vien - Load Students from DB
 
+        var arrList = mutableListOf<Student>()
+        // tao du lieu mau
+        for (i in 1..100){
+            arrList.add(Student("Huy " + Random.nextInt(), "1234"))
+        }
+        setContent {
+            // nạp mảng SV vào 1 biến list state (trạng thái)
+            // khi tác động vào state này thì dữ liệu sẽ được cập nhật lên màn hình
+            val stateList = remember {
+                mutableStateListOf(*arrList.toTypedArray())
             }
+            LazyColumn {
+                itemsIndexed(stateList){ position , it ->
+                    Row {
+                        Text(text = it.name, fontSize = 22.sp )
+                        Button(onClick = {
+                            stateList.remove(it)
+                        }) {
+                            Text(text = "Delete")
+                        }
+                        Button(onClick = {
+                            // cập nhật 1 item bằng các nhân bản item hiện tại,
+                            // thuộc tính nào được cập nhật thì gán giá trị mới
+                            stateList[position] = it.copy(name = "UPDATE", number = "OKOKO")
+                        }) {
+                            Text(text = "Update")
+                        }
+                    }
+                }
+            }
+        }
+
+
     }
 }
