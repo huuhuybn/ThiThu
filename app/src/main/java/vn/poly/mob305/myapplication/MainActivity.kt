@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
@@ -17,8 +18,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.window.Dialog
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -63,6 +67,8 @@ class MainActivity : ComponentActivity() {
             )
         )
 
+        val catVM = ViewModelProvider(this).get(CatViewModel::class.java)
+
         setContent {
             var catSelected = remember {
                 mutableStateOf<vn.poly.mob305.myapplication.Cat?>(null)
@@ -72,6 +78,15 @@ class MainActivity : ComponentActivity() {
                 mutableStateListOf<vn.poly.mob305.myapplication.Cat>()
             }
 
+//            val cats by catVM.cats.observeAsState(initial = emptyList())
+//            LazyColumn {
+//                items(cats) { cat ->
+//                    {
+//
+//                    }
+//                }
+//            }
+
             Column {
 
                 Button(onClick = {
@@ -79,8 +94,6 @@ class MainActivity : ComponentActivity() {
                 }) {
                     Text(text = "ADD")
                 }
-
-
 
                 Button(onClick = {
                     val apiS =
@@ -124,7 +137,7 @@ class MainActivity : ComponentActivity() {
                                 Text(text = "Delete")
                             }
                             Button(onClick = {
-                                var cat = it.copy("5555","kkkk",3333)
+                                var cat = it.copy("5555", "kkkk", 3333)
                                 listStateCatS[i] = cat
                             }) {
                                 Text(text = "Update")
