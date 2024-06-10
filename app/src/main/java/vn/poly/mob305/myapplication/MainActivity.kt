@@ -19,11 +19,25 @@ import coil.compose.AsyncImage
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.window.Dialog
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 class MainActivity : ComponentActivity() {
     // LazyColum là 1 compose hiển thị danh sách từ mảng - List - Array ...
 
     data class Cat(val id: Int, val name: String, val des: String, val url: String)
+
+    // địa chỉ mà nếu truy cập thì sẽ trả về thông tin là JSON
+    // https://cataas.com/api/cats?tags=cute&skip=0&limit=10.
+    // BASE_URL : https://cataas.com
+    // Path : api/cats
+    // ? tags=cute&skip=0&limit=10 : params , tags , skip , limit
+    // tags=cute : query
+    // B1 : khởi tạo retrofit : nạp BaseURL và thư viện chuyển đổi JSON sang  Object
+    // B2 : khởi tạo Object - Model : dữ liệu được chuyển từ JSON Object
+    // B3 : khởi tạo Request bằng interface
+    // B4 : Sử dụng
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -51,35 +65,80 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             var catSelected = remember {
-                mutableStateOf<Cat?>(null)
+                mutableStateOf<vn.poly.mob305.myapplication.Cat?>(null)
             }
 
             var listStateCatS = remember {
-                mutableStateListOf(*catList.toTypedArray())
+                mutableStateListOf<vn.poly.mob305.myapplication.Cat>()
             }
 
-            LazyColumn {
-                itemsIndexed(listStateCatS) { i, it ->
-                    Column {
-                        Button(onClick = {
-                            catSelected.value = it
-                        }) {
-                            Text(text = "Detail")
+            Column {
+
+                Button(onClick = {
+                    listStateCatS.add(Cat("23dsfsdf", "fsdfdsf", 333, listOf("444", "okok")))
+                }) {
+                    Text(text = "ADD")
+                }
+
+
+
+                Button(onClick = {
+                    val apiS =
+                        RetrofitBase.getClient().create(ApiService::class.java)
+                            .getListCats("", 0, 100)
+                    apiS.enqueue(object : Callback<List<vn.poly.mob305.myapplication.Cat>> {
+                        override fun onResponse(
+                            p0: Call<List<vn.poly.mob305.myapplication.Cat>>,
+                            p1: Response<List<vn.poly.mob305.myapplication.Cat>>
+                        ) {
+                            listStateCatS.clear() // xoa du lieu cu di
+                            p1.body()?.let {
+                                listStateCatS.addAll(it)
+                            }
                         }
-                        Button(onClick = {
-                            listStateCatS.remove(it)
-                        }) {
-                            Text(text = "Delete")
+
+                        override fun onFailure(
+                            p0: Call<List<vn.poly.mob305.myapplication.Cat>>,
+                            p1: Throwable
+                        ) {
+                            TODO("Not yet implemented")
                         }
-                        Text(text = "ID : ${it.id}")
-                        Text(text = "Name : ${it.name}")
-                        Text(text = "Des : ${it.des}")
-                        AsyncImage(
-                            modifier = Modifier.size(90.dp, 90.dp),
-                            model = "${it.url}",
-                            contentDescription = "ABC"
-                        )
-                        Text(text = "-------------------------------------")
+                    })
+
+
+                }) {
+                    Text(text = "Load Data")
+                }
+
+                LazyColumn {
+                    itemsIndexed(listStateCatS) { i, it ->
+                        Column {
+                            Button(onClick = {
+                                catSelected.value = it
+                            }) {
+                                Text(text = "Detail")
+                            }
+                            Button(onClick = {
+                                listStateCatS.remove(it)
+                            }) {
+                                Text(text = "Delete")
+                            }
+                            Button(onClick = {
+                                var cat = it.copy("5555","kkkk",3333)
+                                listStateCatS[i] = cat
+                            }) {
+                                Text(text = "Update")
+                            }
+                            Text(text = "ID : ${it._id}")
+                            Text(text = "Name : ${it.mimetype}")
+                            Text(text = "Des : ${it.size}")
+                            AsyncImage(
+                                modifier = Modifier.size(90.dp, 90.dp),
+                                model = "https://cataas.com/cat/${it._id}",
+                                contentDescription = "ABC"
+                            )
+                            Text(text = "-------------------------------------")
+                        }
                     }
                 }
             }
@@ -87,11 +146,11 @@ class MainActivity : ComponentActivity() {
             catSelected.value?.let {
                 Dialog(onDismissRequest = { catSelected.value = null }) {
                     Column {
-                        Text(text = "${catSelected.value?.des}")
-                        Text(text = "${catSelected.value?.name}")
+                        Text(text = "${catSelected.value?.size}")
+                        Text(text = "${catSelected.value?.mimetype}")
                         AsyncImage(
                             modifier = Modifier.size(90.dp, 90.dp),
-                            model = "${it.url}",
+                            model = "${it._id}",
                             contentDescription = "ABC"
                         )
                     }
